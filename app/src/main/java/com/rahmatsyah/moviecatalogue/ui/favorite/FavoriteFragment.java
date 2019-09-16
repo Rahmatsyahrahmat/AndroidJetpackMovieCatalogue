@@ -18,7 +18,7 @@ import com.rahmatsyah.moviecatalogue.R;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class FavoriteFragment extends Fragment {
+public class FavoriteFragment extends Fragment implements TabLayout.OnTabSelectedListener {
 
     private TabLayout tabLayout;
     private ViewPager viewPager;
@@ -39,6 +39,32 @@ public class FavoriteFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         tabLayout = view.findViewById(R.id.tlFavorite);
-        viewPager = viewPager.findViewById(R.id.vpFavorite);
+        viewPager = view.findViewById(R.id.vpFavorite);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        FavoritePagerAdapter adapter = new FavoritePagerAdapter(getFragmentManager(),tabLayout.getTabCount());
+        viewPager.setAdapter(adapter);
+
+        tabLayout.setOnTabSelectedListener(this);
+
+        viewPager.setOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+    }
+
+    @Override
+    public void onTabSelected(TabLayout.Tab tab) {
+        viewPager.setCurrentItem(tab.getPosition());
+    }
+
+    @Override
+    public void onTabUnselected(TabLayout.Tab tab) {
+
+    }
+
+    @Override
+    public void onTabReselected(TabLayout.Tab tab) {
+
     }
 }

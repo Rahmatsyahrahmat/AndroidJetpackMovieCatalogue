@@ -10,8 +10,11 @@ import com.rahmatsyah.moviecatalogue.utils.JsonHelper;
 import android.os.Handler;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -33,103 +36,98 @@ public class RemoteRepository {
         return INSTANCE;
     }
 
-    public void getMovies(LoadMoviesCallback loadMoviesCallback){
+    public LiveData<ApiResponse<List<MovieResponse>>> getMovies(){
         EspressoIdlingResource.increment();
+
+        MutableLiveData<ApiResponse<List<MovieResponse>>> movieResult = new MutableLiveData<>();
+
         Handler handler = new Handler();
         handler.postDelayed(() -> jsonHelper.getMovies().enqueue(new Callback<RootMovieResponse>() {
             @Override
             public void onResponse(@NonNull Call<RootMovieResponse> call, @NonNull Response<RootMovieResponse> response) {
                 assert response.body() != null;
-                loadMoviesCallback.onAllMovieReceived(response.body().getResults());
-                EspressoIdlingResource.decrement();
+                movieResult.setValue(ApiResponse.success(response.body().getResults()));
+                if (!EspressoIdlingResource.getEspressoIdlingResource().isIdleNow())
+                    EspressoIdlingResource.decrement();
             }
 
             @Override
             public void onFailure(@NonNull Call<RootMovieResponse> call, @NonNull Throwable t) {
-                loadMoviesCallback.onDataNotAvailable();
                 EspressoIdlingResource.decrement();
             }
         }),SERVICE_LATENCY_IN_MILLIS);
+
+        return movieResult;
     }
 
-    public void getTvShows(LoadTvShowsCallback loadTvShowsCallback){
+    public LiveData<ApiResponse<List<TvShowResponse>>> getTvShows(){
         EspressoIdlingResource.increment();
+
+        MutableLiveData<ApiResponse<List<TvShowResponse>>> tvShowResult = new MutableLiveData<>();
+
         Handler handler = new Handler();
         handler.postDelayed(() -> jsonHelper.getTvShow().enqueue(new Callback<RootTvShowResponse>() {
             @Override
             public void onResponse(@NonNull Call<RootTvShowResponse> call, @NonNull Response<RootTvShowResponse> response) {
                 assert response.body() != null;
-                loadTvShowsCallback.onAllTvShowReceived(response.body().getResults());
-                EspressoIdlingResource.decrement();
+                tvShowResult.setValue(ApiResponse.success(response.body().getResults()));
+                if (!EspressoIdlingResource.getEspressoIdlingResource().isIdleNow())
+                    EspressoIdlingResource.decrement();
             }
 
             @Override
             public void onFailure(@NonNull Call<RootTvShowResponse> call, @NonNull Throwable t) {
-                loadTvShowsCallback.onDataNotAvailable();
                 EspressoIdlingResource.decrement();
             }
         }),SERVICE_LATENCY_IN_MILLIS);
+
+        return tvShowResult;
     }
 
-    public void getMovie(long id, LoadMovieCallback loadMovieCallback){
+    public LiveData<ApiResponse<MovieResponse>> getMovie(long id){
         EspressoIdlingResource.increment();
+
+        MutableLiveData<ApiResponse<MovieResponse>> movieResult = new MutableLiveData<>();
+
         Handler handler = new Handler();
         handler.postDelayed(()-> jsonHelper.getMovieById(id).enqueue(new Callback<MovieResponse>() {
             @Override
             public void onResponse(@NonNull Call<MovieResponse> call, @NonNull Response<MovieResponse> response) {
-                loadMovieCallback.onMovieReceived(response.body());
-                EspressoIdlingResource.decrement();
+                movieResult.setValue(ApiResponse.success(response.body()));
+                if (!EspressoIdlingResource.getEspressoIdlingResource().isIdleNow())
+                    EspressoIdlingResource.decrement();
             }
 
             @Override
             public void onFailure(@NonNull Call<MovieResponse> call, @NonNull Throwable t) {
-                loadMovieCallback.onDataNotAvailable();
                 EspressoIdlingResource.decrement();
             }
         }),SERVICE_LATENCY_IN_MILLIS);
+        return movieResult;
     }
 
-    public void getTvShow(long id, LoadTvShowCallback loadTvShowCallback){
+    public LiveData<ApiResponse<TvShowResponse>> getTvShow(long id){
         EspressoIdlingResource.increment();
+
+        MutableLiveData<ApiResponse<TvShowResponse>> tvShowResult = new MutableLiveData<>();
+
         Handler handler = new Handler();
         handler.postDelayed(()-> jsonHelper.getTvShowById(id).enqueue(new Callback<TvShowResponse>() {
             @Override
             public void onResponse(@NonNull Call<TvShowResponse> call, @NonNull Response<TvShowResponse> response) {
-                loadTvShowCallback.onTvShowReceived(response.body());
-                EspressoIdlingResource.decrement();
+                tvShowResult.setValue(ApiResponse.success(response.body()));
+                if (!EspressoIdlingResource.getEspressoIdlingResource().isIdleNow())
+                    EspressoIdlingResource.decrement();
             }
 
             @Override
             public void onFailure(@NonNull Call<TvShowResponse> call, @NonNull Throwable t) {
-                loadTvShowCallback.onDataNotAvailable();
                 EspressoIdlingResource.decrement();
             }
         }),SERVICE_LATENCY_IN_MILLIS);
+
+        return tvShowResult;
     }
 
-
-    public interface LoadMoviesCallback {
-        void onAllMovieReceived(ArrayList<MovieResponse> movieResponses);
-
-        void onDataNotAvailable();
-    }
-
-    public interface LoadTvShowsCallback {
-        void onAllTvShowReceived(ArrayList<TvShowResponse> tvShowResponses);
-
-        void onDataNotAvailable();
-    }
-
-    public interface LoadMovieCallback{
-        void onMovieReceived(MovieResponse movieResponse);
-
-        void onDataNotAvailable();
-    }
-
-    public interface LoadTvShowCallback{
-        void onTvShowReceived(TvShowResponse tvShowResponse);
-
-        void onDataNotAvailable();
-    }
 
 }

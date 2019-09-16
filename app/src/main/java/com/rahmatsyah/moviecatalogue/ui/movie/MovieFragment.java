@@ -16,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.rahmatsyah.moviecatalogue.R;
 import com.rahmatsyah.moviecatalogue.viewmodel.ViewModelFactory;
@@ -61,11 +62,23 @@ public class MovieFragment extends Fragment {
 
             movieAdapter = new MovieAdapter(getActivity());
 
-            movieViewModel.getMovies().observe(this,movies -> {
-                progressBar.setVisibility(View.GONE);
-                movieAdapter.setListMovie(movies);
-                movieAdapter.notifyDataSetChanged();
-
+            movieViewModel.getMovies().observe(this,movies->{
+                if (movies!=null){
+                    switch (movies.status){
+                        case SUCCESS:
+                            progressBar.setVisibility(View.GONE);
+                            movieAdapter.setListMovie(movies.data);
+                            movieAdapter.notifyDataSetChanged();
+                            break;
+                        case LOADING:
+                            progressBar.setVisibility(View.VISIBLE);
+                            break;
+                        case ERROR:
+                            progressBar.setVisibility(View.GONE);
+                            Toast.makeText(getActivity(),R.string.failed_receive_data,Toast.LENGTH_LONG).show();
+                            break;
+                    }
+                }
             });
 
             recyclerView.setAdapter(movieAdapter);
@@ -74,7 +87,7 @@ public class MovieFragment extends Fragment {
 
     @NonNull
     private static MovieViewModel obtainViewModel(FragmentActivity activity){
-        ViewModelFactory factory = ViewModelFactory.getInstance();
+        ViewModelFactory factory = ViewModelFactory.getInstance(activity.getApplication());
         return ViewModelProviders.of(activity,factory).get(MovieViewModel.class);
     }
 }

@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.rahmatsyah.moviecatalogue.R;
 import com.rahmatsyah.moviecatalogue.viewmodel.ViewModelFactory;
@@ -60,10 +61,23 @@ public class TvShowFragment extends Fragment {
 
             tvShowAdapter = new TvShowAdapter(getActivity());
 
-            tvShowViewModel.getTvShows().observe(this, tvShowEntities -> {
-                progressBar.setVisibility(View.GONE);
-                tvShowAdapter.setListTvShows(tvShowEntities);
-                tvShowAdapter.notifyDataSetChanged();
+            tvShowViewModel.getTvShows().observe(this,tvShows->{
+                if (tvShows!=null){
+                    switch (tvShows.status){
+                        case SUCCESS:
+                            progressBar.setVisibility(View.GONE);
+                            tvShowAdapter.setListTvShows(tvShows.data);
+                            tvShowAdapter.notifyDataSetChanged();
+                            break;
+                        case LOADING:
+                            progressBar.setVisibility(View.VISIBLE);
+                            break;
+                        case ERROR:
+                            progressBar.setVisibility(View.GONE);
+                            Toast.makeText(getActivity(),R.string.failed_receive_data,Toast.LENGTH_LONG).show();
+                            break;
+                    }
+                }
             });
 
             recyclerView.setAdapter(tvShowAdapter);
@@ -72,7 +86,7 @@ public class TvShowFragment extends Fragment {
 
     @NonNull
     private static TvShowViewModel obtainViewModel(FragmentActivity activity){
-        ViewModelFactory factory = ViewModelFactory.getInstance();
+        ViewModelFactory factory = ViewModelFactory.getInstance(activity.getApplication());
         return ViewModelProviders.of(activity,factory).get(TvShowViewModel.class);
     }
 }

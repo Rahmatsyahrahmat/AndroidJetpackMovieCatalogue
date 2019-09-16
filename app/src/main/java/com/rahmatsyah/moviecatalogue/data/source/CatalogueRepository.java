@@ -1,5 +1,7 @@
 package com.rahmatsyah.moviecatalogue.data.source;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -7,11 +9,15 @@ import androidx.lifecycle.MutableLiveData;
 import com.rahmatsyah.moviecatalogue.data.source.local.LocalRepository;
 import com.rahmatsyah.moviecatalogue.data.source.local.entity.MovieEntity;
 import com.rahmatsyah.moviecatalogue.data.source.local.entity.TvShowEntity;
+import com.rahmatsyah.moviecatalogue.data.source.remote.ApiResponse;
 import com.rahmatsyah.moviecatalogue.data.source.remote.RemoteRepository;
 import com.rahmatsyah.moviecatalogue.data.source.remote.response.MovieResponse;
 import com.rahmatsyah.moviecatalogue.data.source.remote.response.TvShowResponse;
+import com.rahmatsyah.moviecatalogue.utils.AppExecutor;
+import com.rahmatsyah.moviecatalogue.vo.Resource;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class CatalogueRepository implements CatalogueDataSource{
 
@@ -19,17 +25,19 @@ public class CatalogueRepository implements CatalogueDataSource{
 
     private final LocalRepository localRepository;
     private final RemoteRepository remoteRepository;
+    private final AppExecutor appExecutor;
 
-    private CatalogueRepository(@NonNull LocalRepository localRepository, @NonNull RemoteRepository remoteRepository){
+    private CatalogueRepository(@NonNull LocalRepository localRepository, @NonNull RemoteRepository remoteRepository,@NonNull AppExecutor appExecutor){
         this.localRepository = localRepository;
         this.remoteRepository = remoteRepository;
+        this.appExecutor = appExecutor;
     }
 
-    public static CatalogueRepository getInstance(LocalRepository localRepository, RemoteRepository remoteRepository){
+    public static CatalogueRepository getInstance(LocalRepository localRepository, RemoteRepository remoteRepository, AppExecutor appExecutor){
         if (INSTANCE==null){
             synchronized (CatalogueRepository.class){
                 if (INSTANCE==null){
-                    INSTANCE = new CatalogueRepository(localRepository,remoteRepository);
+                    INSTANCE = new CatalogueRepository(localRepository,remoteRepository,appExecutor);
                 }
             }
         }
@@ -37,86 +45,136 @@ public class CatalogueRepository implements CatalogueDataSource{
     }
 
     @Override
-    public LiveData<ArrayList<MovieEntity>> getMovies() {
-        MutableLiveData<ArrayList<MovieEntity>> movieResult = new MutableLiveData<>();
-
-        remoteRepository.getMovies(new RemoteRepository.LoadMoviesCallback() {
+    public LiveData<Resource<List<MovieEntity>>> getMovies() {
+        return new NetworkBoundResource<List<MovieEntity>,List<MovieResponse>>(appExecutor){
             @Override
-            public void onAllMovieReceived(ArrayList<MovieResponse> movieResponses) {
-                ArrayList<MovieEntity> movieEntities = new ArrayList<>();
-                for (MovieResponse movieResponse:movieResponses){
+            protected LiveData<List<MovieEntity>> loadFromDB() {
+                return localRepository.getMovies();
+            }
+
+            @Override
+            protected Boolean shouldFetch(List<MovieEntity> data) {
+                return (data==null)||(data.size()==0);
+            }
+
+            @Override
+            protected LiveData<ApiResponse<List<MovieResponse>>> createCall() {
+                return remoteRepository.getMovies();
+            }
+
+            @Override
+            protected void saveCallResult(List<MovieResponse> data) {
+                List<MovieEntity> movieEntities = new ArrayList<>();
+                for (MovieResponse movieResponse:data){
                     movieEntities.add(new MovieEntity(movieResponse));
                 }
-                movieResult.postValue(movieEntities);
+                localRepository.insertMovies(movieEntities);
             }
-
-            @Override
-            public void onDataNotAvailable() {
-
-            }
-        });
-        return movieResult;
+        }.asLiveData();
     }
 
     @Override
-    public LiveData<ArrayList<TvShowEntity>> getTvShows() {
-        MutableLiveData<ArrayList<TvShowEntity>> tvShowResult = new MutableLiveData<>();
+    public LiveData<Resource<List<TvShowEntity>>> getTvShows() {
+        return new NetworkBoundResource<List<TvShowEntity>,List<TvShowResponse>>(appExecutor){
 
-        remoteRepository.getTvShows(new RemoteRepository.LoadTvShowsCallback() {
             @Override
-            public void onAllTvShowReceived(ArrayList<TvShowResponse> tvShowResponses) {
-                ArrayList<TvShowEntity> tvShowEntities = new ArrayList<>();
-                for (TvShowResponse tvShowResponse:tvShowResponses){
+            protected LiveData<List<TvShowEntity>> loadFromDB() {
+                return localRepository.getTvShows();
+            }
+
+            @Override
+            protected Boolean shouldFetch(List<TvShowEntity> data) {
+                return (data==null)||(data.size()==0);
+            }
+
+            @Override
+            protected LiveData<ApiResponse<List<TvShowResponse>>> createCall() {
+                return remoteRepository.getTvShows();
+            }
+
+            @Override
+            protected void saveCallResult(List<TvShowResponse> data) {
+                List<TvShowEntity> tvShowEntities = new ArrayList<>();
+
+                for (TvShowResponse tvShowResponse:data){
                     tvShowEntities.add(new TvShowEntity(tvShowResponse));
                 }
-                tvShowResult.postValue(tvShowEntities);
+
+                localRepository.insertTvShows(tvShowEntities);
             }
-
-            @Override
-            public void onDataNotAvailable() {
-
-            }
-        });
-
-        return tvShowResult;
+        }.asLiveData();
     }
 
     @Override
-    public LiveData<MovieEntity> getMovie(long id) {
-        MutableLiveData<MovieEntity> movieResult = new MutableLiveData<>();
+    public LiveData<Resource<MovieEntity>> getMovie(long id) {
+        return new NetworkBoundResource<MovieEntity,MovieResponse>(appExecutor){
 
-        remoteRepository.getMovie(id, new RemoteRepository.LoadMovieCallback() {
             @Override
-            public void onMovieReceived(MovieResponse movieResponse) {
-                MovieEntity movieEntity = new MovieEntity(movieResponse);
-                movieResult.postValue(movieEntity);
+            protected LiveData<MovieEntity> loadFromDB() {
+                return localRepository.getMovieById(id);
             }
 
             @Override
-            public void onDataNotAvailable() {
-
+            protected Boolean shouldFetch(MovieEntity data) {
+                return data==null;
             }
-        });
-        return movieResult;
+
+            @Override
+            protected LiveData<ApiResponse<MovieResponse>> createCall() {
+                return remoteRepository.getMovie(id);
+            }
+
+            @Override
+            protected void saveCallResult(MovieResponse data) {
+                MovieEntity movieEntity = new MovieEntity(data);
+                List<MovieEntity> movieEntities = new ArrayList<>();
+                movieEntities.add(movieEntity);
+                localRepository.insertMovies(movieEntities);
+            }
+        }.asLiveData();
     }
 
     @Override
-    public LiveData<TvShowEntity> getTvShow(long id) {
-        MutableLiveData<TvShowEntity> tvShowResult = new MutableLiveData<>();
+    public LiveData<Resource<TvShowEntity>> getTvShow(long id) {
+        return new NetworkBoundResource<TvShowEntity,TvShowResponse>(appExecutor){
 
-        remoteRepository.getTvShow(id, new RemoteRepository.LoadTvShowCallback() {
             @Override
-            public void onTvShowReceived(TvShowResponse tvShowResponse) {
-                TvShowEntity tvShowEntity = new TvShowEntity(tvShowResponse);
-                tvShowResult.postValue(tvShowEntity);
+            protected LiveData<TvShowEntity> loadFromDB() {
+                return localRepository.getTvShowById(id);
             }
 
             @Override
-            public void onDataNotAvailable() {
-
+            protected Boolean shouldFetch(TvShowEntity data) {
+                return data==null;
             }
-        });
-        return tvShowResult;
+
+            @Override
+            protected LiveData<ApiResponse<TvShowResponse>> createCall() {
+                return remoteRepository.getTvShow(id);
+            }
+
+            @Override
+            protected void saveCallResult(TvShowResponse data) {
+                TvShowEntity tvShowEntity = new TvShowEntity(data);
+                List<TvShowEntity> tvShowEntities = new ArrayList<>();
+                tvShowEntities.add(tvShowEntity);
+                localRepository.insertTvShows(tvShowEntities);
+            }
+        }.asLiveData();
+    }
+
+    @Override
+    public void bookmark(MovieEntity movieEntity) {
+        Runnable runnable = ()-> localRepository.bookmark(movieEntity);
+
+        appExecutor.diskIO().execute(runnable);
+    }
+
+    @Override
+    public void bookmark(TvShowEntity tvShowEntity) {
+        Runnable runnable = ()-> localRepository.bookmark(tvShowEntity);
+
+        appExecutor.diskIO().execute(runnable);
     }
 
 }

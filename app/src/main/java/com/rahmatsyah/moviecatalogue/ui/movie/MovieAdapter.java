@@ -17,11 +17,12 @@ import com.rahmatsyah.moviecatalogue.data.source.local.entity.MovieEntity;
 import com.rahmatsyah.moviecatalogue.ui.detail.movie.DetailMovieActivity;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> {
 
     private Context context;
-    private ArrayList<MovieEntity> movies = new ArrayList<>();
+    private List<MovieEntity> movies = new ArrayList<>();
 
     private final static String BASE_POSTER = "https://image.tmdb.org/t/p/w342";
 
@@ -29,7 +30,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         this.context = context;
     }
 
-    public void setListMovie(ArrayList<MovieEntity> movieEntities){
+    public void setListMovie(List<MovieEntity> movieEntities){
         movies = movieEntities;
     }
 

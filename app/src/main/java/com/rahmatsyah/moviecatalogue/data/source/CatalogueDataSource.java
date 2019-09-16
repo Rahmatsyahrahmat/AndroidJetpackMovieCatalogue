@@ -4,17 +4,23 @@ import androidx.lifecycle.LiveData;
 
 import com.rahmatsyah.moviecatalogue.data.source.local.entity.MovieEntity;
 import com.rahmatsyah.moviecatalogue.data.source.local.entity.TvShowEntity;
+import com.rahmatsyah.moviecatalogue.vo.Resource;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public interface CatalogueDataSource {
 
-    LiveData<ArrayList<MovieEntity>> getMovies();
+    LiveData<Resource<List<MovieEntity>>> getMovies();
 
-    LiveData<ArrayList<TvShowEntity>> getTvShows();
+    LiveData<Resource<List<TvShowEntity>>> getTvShows();
 
-    LiveData<MovieEntity> getMovie(long id);
+    LiveData<Resource<MovieEntity>> getMovie(long id);
 
-    LiveData<TvShowEntity> getTvShow(long id);
+    LiveData<Resource<TvShowEntity>> getTvShow(long id);
+
+    void bookmark(MovieEntity movieEntity);
+
+    void bookmark(TvShowEntity tvShowEntity);
 
 }

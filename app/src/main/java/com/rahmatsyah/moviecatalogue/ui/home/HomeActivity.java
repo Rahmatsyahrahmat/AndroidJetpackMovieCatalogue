@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.rahmatsyah.moviecatalogue.R;
+import com.rahmatsyah.moviecatalogue.ui.favorite.FavoriteFragment;
 import com.rahmatsyah.moviecatalogue.ui.movie.MovieFragment;
 import com.rahmatsyah.moviecatalogue.ui.tvshow.TvShowFragment;
 
@@ -43,6 +44,9 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
                 return true;
             case R.id.navigation_tv_shows:
                 fragmentTransaction.replace(R.id.frameHome,new TvShowFragment()).commit();
+                return true;
+            case R.id.navigation_favorite:
+                fragmentTransaction.replace(R.id.frameHome,new FavoriteFragment()).commit();
                 return true;
         }
         return false;

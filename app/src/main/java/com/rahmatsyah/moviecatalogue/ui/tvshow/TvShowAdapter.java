@@ -18,11 +18,12 @@ import com.rahmatsyah.moviecatalogue.data.source.local.entity.TvShowEntity;
 import com.rahmatsyah.moviecatalogue.ui.detail.tvshow.DetailTvShowActivity;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class TvShowAdapter extends RecyclerView.Adapter<TvShowAdapter.ViewHolder> {
 
     private Context context;
-    private ArrayList<TvShowEntity> tvShows = new ArrayList<>();
+    private List<TvShowEntity> tvShows = new ArrayList<>();
 
     private final static String BASE_POSTER = "https://image.tmdb.org/t/p/w342";
 
@@ -30,7 +31,7 @@ public class TvShowAdapter extends RecyclerView.Adapter<TvShowAdapter.ViewHolder
         this.context = context;
     }
 
-    public void setListTvShows(ArrayList<TvShowEntity> tvShows){
+    public void setListTvShows(List<TvShowEntity> tvShows){
         this.tvShows = tvShows;
     }
 

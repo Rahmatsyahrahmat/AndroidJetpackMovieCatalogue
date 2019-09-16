@@ -3,7 +3,6 @@
     <string name="poster">Poster</string>
     <string name="tv_shows">Tv Shows</string>
     <string name="movies">Movies</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="favorite">Favorite</string>
+    <string name="failed_receive_data">Failed to receive data</string>
 </resources>

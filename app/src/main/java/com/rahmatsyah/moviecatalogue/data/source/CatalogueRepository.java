@@ -164,6 +164,58 @@ public class CatalogueRepository implements CatalogueDataSource{
     }
 
     @Override
+    public LiveData<Resource<List<MovieEntity>>> getBookmarkedMovies() {
+        return new NetworkBoundResource<List<MovieEntity>,List<MovieResponse>>(appExecutor){
+
+            @Override
+            protected LiveData<List<MovieEntity>> loadFromDB() {
+                return localRepository.getBookmarkedMovies();
+            }
+
+            @Override
+            protected Boolean shouldFetch(List<MovieEntity> data) {
+                return false;
+            }
+
+            @Override
+            protected LiveData<ApiResponse<List<MovieResponse>>> createCall() {
+                return null;
+            }
+
+            @Override
+            protected void saveCallResult(List<MovieResponse> data) {
+
+            }
+        }.asLiveData();
+    }
+
+    @Override
+    public LiveData<Resource<List<TvShowEntity>>> getBookmarkedTvShows() {
+        return new NetworkBoundResource<List<TvShowEntity>,List<TvShowResponse>>(appExecutor){
+
+            @Override
+            protected LiveData<List<TvShowEntity>> loadFromDB() {
+                return localRepository.getBookmarkedTvShows();
+            }
+
+            @Override
+            protected Boolean shouldFetch(List<TvShowEntity> data) {
+                return false;
+            }
+
+            @Override
+            protected LiveData<ApiResponse<List<TvShowResponse>>> createCall() {
+                return null;
+            }
+
+            @Override
+            protected void saveCallResult(List<TvShowResponse> data) {
+
+            }
+        }.asLiveData();
+    }
+
+    @Override
     public void bookmark(MovieEntity movieEntity) {
         Runnable runnable = ()-> localRepository.bookmark(movieEntity);
 

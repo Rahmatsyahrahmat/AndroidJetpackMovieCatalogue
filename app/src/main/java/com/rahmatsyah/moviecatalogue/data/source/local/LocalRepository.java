@@ -43,11 +43,11 @@ public class LocalRepository {
        return catalogueDao.getTvShowById(id);
    }
 
-   public LiveData<MovieEntity> getBookmarkedMovies(){
+   public LiveData<List<MovieEntity>> getBookmarkedMovies(){
        return catalogueDao.getBookmarkedMovies();
    }
 
-   public LiveData<TvShowEntity> getBookmarkedTvShows(){
+   public LiveData<List<TvShowEntity>> getBookmarkedTvShows(){
        return catalogueDao.getBookmarkedTvShows();
    }
 

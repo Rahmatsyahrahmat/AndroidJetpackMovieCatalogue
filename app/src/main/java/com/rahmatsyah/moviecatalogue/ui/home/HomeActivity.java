@@ -14,7 +14,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.view.MenuItem;
 
-public class HomeActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
+public class HomeActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener, BottomNavigationView.OnNavigationItemReselectedListener {
 
     private final String SELECTED_MENU = "selected_menu";
 
@@ -33,6 +33,7 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
         else {
             bottomNavigationView.setSelectedItemId(R.id.navigation_movies);
         }
+        bottomNavigationView.setOnNavigationItemReselectedListener(this);
     }
 
     @Override
@@ -56,5 +57,11 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(SELECTED_MENU,bottomNavigationView.getSelectedItemId());
+    }
+
+
+    @Override
+    public void onNavigationItemReselected(@NonNull MenuItem menuItem) {
+
     }
 }

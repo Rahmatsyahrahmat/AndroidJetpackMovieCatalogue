@@ -10,6 +10,8 @@ import com.rahmatsyah.moviecatalogue.data.source.CatalogueRepository;
 import com.rahmatsyah.moviecatalogue.di.Injection;
 import com.rahmatsyah.moviecatalogue.ui.detail.movie.DetailMovieViewModel;
 import com.rahmatsyah.moviecatalogue.ui.detail.tvshow.DetailTvShowViewModel;
+import com.rahmatsyah.moviecatalogue.ui.favorite.movie.FavoriteMovieViewModel;
+import com.rahmatsyah.moviecatalogue.ui.favorite.tvshow.FavoriteTvShowViewModel;
 import com.rahmatsyah.moviecatalogue.ui.movie.MovieViewModel;
 import com.rahmatsyah.moviecatalogue.ui.tvshow.TvShowViewModel;
 
@@ -39,17 +41,17 @@ public class ViewModelFactory extends ViewModelProvider.NewInstanceFactory {
 
 
         if (modelClass.isAssignableFrom(MovieViewModel.class)){
-            //noinspection unchecked
             return (T) new MovieViewModel(catalogueRepository);
         }else if (modelClass.isAssignableFrom(TvShowViewModel.class)){
-            //noinspection unchecked
             return (T) new TvShowViewModel(catalogueRepository);
         }else if (modelClass.isAssignableFrom(DetailMovieViewModel.class)){
-            //noinspection unchecked
             return (T) new DetailMovieViewModel(catalogueRepository);
         }else if (modelClass.isAssignableFrom(DetailTvShowViewModel.class)){
-            //noinspection unchecked
             return (T) new DetailTvShowViewModel(catalogueRepository);
+        }else if (modelClass.isAssignableFrom(FavoriteMovieViewModel.class)){
+            return (T) new FavoriteMovieViewModel(catalogueRepository);
+        }else if (modelClass.isAssignableFrom(FavoriteTvShowViewModel.class)){
+            return (T) new FavoriteTvShowViewModel(catalogueRepository);
         }
 
         throw new IllegalArgumentException("Unknown ViewModel class: "+modelClass.getName());

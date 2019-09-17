@@ -29,10 +29,10 @@ public interface CatalogueDao {
     LiveData<TvShowEntity> getTvShowById(long id);
 
     @Query("SELECT * FROM movie WHERE bookmark=1")
-    LiveData<MovieEntity> getBookmarkedMovies();
+    LiveData<List<MovieEntity>> getBookmarkedMovies();
 
     @Query("SELECT * FROM tvshow WHERE bookmark=1")
-    LiveData<TvShowEntity> getBookmarkedTvShows();
+    LiveData<List<TvShowEntity>> getBookmarkedTvShows();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertMovies(List<MovieEntity> movieEntity);

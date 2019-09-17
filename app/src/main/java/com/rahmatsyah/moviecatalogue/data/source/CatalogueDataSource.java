@@ -19,6 +19,10 @@ public interface CatalogueDataSource {
 
     LiveData<Resource<TvShowEntity>> getTvShow(long id);
 
+    LiveData<Resource<List<MovieEntity>>> getBookmarkedMovies();
+
+    LiveData<Resource<List<TvShowEntity>>> getBookmarkedTvShows();
+
     void bookmark(MovieEntity movieEntity);
 
     void bookmark(TvShowEntity tvShowEntity);

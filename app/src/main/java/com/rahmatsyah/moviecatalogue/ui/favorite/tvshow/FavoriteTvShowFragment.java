@@ -30,7 +30,7 @@ public class FavoriteTvShowFragment extends Fragment {
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
 
-    private TvShowAdapter adapter;
+    private FavoriteTvShowPagedAdapter adapter;
 
     private FavoriteTvShowViewModel viewModel;
 
@@ -63,14 +63,14 @@ public class FavoriteTvShowFragment extends Fragment {
 
             viewModel = obtainViewModel(this);
 
-            adapter = new TvShowAdapter(getContext());
+            adapter = new FavoriteTvShowPagedAdapter(getContext());
 
             viewModel.getBookmarkedTvShows().observe(getViewLifecycleOwner(), tvShows -> {
                 if (tvShows != null) {
                     switch (tvShows.status) {
                         case SUCCESS:
                             progressBar.setVisibility(View.GONE);
-                            adapter.setListTvShows(tvShows.data);
+                            adapter.submitList(tvShows.data);
                             adapter.notifyDataSetChanged();
                             break;
                         case LOADING:

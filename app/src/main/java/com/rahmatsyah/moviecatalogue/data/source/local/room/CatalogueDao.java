@@ -1,6 +1,7 @@
 package com.rahmatsyah.moviecatalogue.data.source.local.room;
 
 import androidx.lifecycle.LiveData;
+import androidx.paging.DataSource;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -29,10 +30,10 @@ public interface CatalogueDao {
     LiveData<TvShowEntity> getTvShowById(long id);
 
     @Query("SELECT * FROM movie WHERE bookmark=1")
-    LiveData<List<MovieEntity>> getBookmarkedMovies();
+    DataSource.Factory<Integer, MovieEntity> getBookmarkedMovies();
 
     @Query("SELECT * FROM tvshow WHERE bookmark=1")
-    LiveData<List<TvShowEntity>> getBookmarkedTvShows();
+    DataSource.Factory<Integer, TvShowEntity> getBookmarkedTvShows();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertMovies(List<MovieEntity> movieEntity);

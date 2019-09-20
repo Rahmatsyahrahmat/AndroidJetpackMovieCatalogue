@@ -18,6 +18,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.rahmatsyah.moviecatalogue.R;
+import com.rahmatsyah.moviecatalogue.ui.favorite.FavoritePagerAdapter;
 import com.rahmatsyah.moviecatalogue.ui.favorite.tvshow.FavoriteTvShowViewModel;
 import com.rahmatsyah.moviecatalogue.ui.movie.MovieAdapter;
 import com.rahmatsyah.moviecatalogue.viewmodel.ViewModelFactory;
@@ -31,7 +32,7 @@ public class FavoriteMovieFragment extends Fragment {
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
 
-    private MovieAdapter adapter;
+    private FavoriteMoviePagedAdapter adapter;
 
     private FavoriteMovieViewModel viewModel;
 
@@ -63,14 +64,14 @@ public class FavoriteMovieFragment extends Fragment {
 
             viewModel = obtainViewModel(this);
 
-            adapter = new MovieAdapter(getContext());
+            adapter = new FavoriteMoviePagedAdapter(getContext());
 
             viewModel.getBookmarkedMovies().observe(getViewLifecycleOwner(), movies->{
                 if (movies!=null){
                     switch (movies.status){
                         case SUCCESS:
                             progressBar.setVisibility(View.GONE);
-                            adapter.setListMovie(movies.data);
+                            adapter.submitList(movies.data);
                             adapter.notifyDataSetChanged();
                             break;
                         case ERROR:

@@ -7,6 +7,7 @@ import androidx.lifecycle.Observer;
 import com.rahmatsyah.moviecatalogue.data.source.CatalogueRepository;
 import com.rahmatsyah.moviecatalogue.data.source.local.entity.MovieEntity;
 import com.rahmatsyah.moviecatalogue.utils.FakeDataDummy;
+import com.rahmatsyah.moviecatalogue.vo.Resource;
 
 import org.junit.After;
 import org.junit.Before;
@@ -14,6 +15,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -38,18 +40,17 @@ public class MovieViewModelTest {
 
     @Test
     public void getMovies(){
-        ArrayList<MovieEntity> dummyMovie = FakeDataDummy.generateDummyMovie();
+        Resource<List<MovieEntity>> resource = Resource.success(FakeDataDummy.generateDummyMovie());
+        MutableLiveData<Resource<List<MovieEntity>>> dummyMovie = new MutableLiveData<>();
+        dummyMovie.setValue(resource);
 
-        MutableLiveData<ArrayList<MovieEntity>> mutableLiveData = new MutableLiveData<>();
-        mutableLiveData.setValue(dummyMovie);
+        when(catalogueRepository.getMovies()).thenReturn(dummyMovie);
 
-        when(catalogueRepository.getMovies()).thenReturn(mutableLiveData);
-
-        Observer<ArrayList<MovieEntity>> observer = mock(Observer.class);
+        Observer<Resource<List<MovieEntity>>> observer = mock(Observer.class);
 
         movieViewModel.getMovies().observeForever(observer);
 
-        verify(observer).onChanged(dummyMovie);
+        verify(observer).onChanged(resource);
     }
 
 }

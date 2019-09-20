@@ -2,6 +2,7 @@ package com.rahmatsyah.moviecatalogue.ui.favorite.tvshow;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
+import androidx.paging.PagedList;
 
 import com.rahmatsyah.moviecatalogue.data.source.CatalogueRepository;
 import com.rahmatsyah.moviecatalogue.data.source.local.entity.TvShowEntity;
@@ -18,7 +19,7 @@ public class FavoriteTvShowViewModel extends ViewModel {
         this.catalogueRepository = catalogueRepository;
     }
 
-    LiveData<Resource<List<TvShowEntity>>> getBookmarkedTvShows(){
+    LiveData<Resource<PagedList<TvShowEntity>>> getBookmarkedTvShows(){
         return catalogueRepository.getBookmarkedTvShows();
     }
 }

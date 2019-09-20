@@ -7,6 +7,7 @@ import androidx.lifecycle.Observer;
 import com.rahmatsyah.moviecatalogue.data.source.CatalogueRepository;
 import com.rahmatsyah.moviecatalogue.data.source.local.entity.TvShowEntity;
 import com.rahmatsyah.moviecatalogue.utils.FakeDataDummy;
+import com.rahmatsyah.moviecatalogue.vo.Resource;
 
 import org.junit.After;
 import org.junit.Before;
@@ -24,11 +25,12 @@ public class DetailTvShowViewModelTest {
 
     private DetailTvShowViewModel detailTvShowViewModel;
     private CatalogueRepository catalogueRepository = mock(CatalogueRepository.class);
-    private TvShowEntity dummyTvShow = FakeDataDummy.generateDummyTvShow().get(0);
+    private Resource<TvShowEntity> dummyTvShow = Resource.success(FakeDataDummy.generateDummyTvShow().get(0));
 
     @Before
     public void setUp(){
         detailTvShowViewModel = new DetailTvShowViewModel(catalogueRepository);
+        detailTvShowViewModel.setTvShowId(dummyTvShow.data.getId());
     }
 
     @After
@@ -36,14 +38,14 @@ public class DetailTvShowViewModelTest {
 
     @Test
     public void getMovie(){
-        MutableLiveData<TvShowEntity> tvShowEntityMutableLiveData = new MutableLiveData<>();
+        MutableLiveData<Resource<TvShowEntity>> tvShowEntityMutableLiveData = new MutableLiveData<>();
         tvShowEntityMutableLiveData.setValue(dummyTvShow);
 
-        when(catalogueRepository.getTvShow(dummyTvShow.getId())).thenReturn(tvShowEntityMutableLiveData);
+        when(catalogueRepository.getTvShow(dummyTvShow.data.getId())).thenReturn(tvShowEntityMutableLiveData);
 
-        Observer<TvShowEntity> observer = mock(Observer.class);
+        Observer<Resource<TvShowEntity>> observer = mock(Observer.class);
 
-        detailTvShowViewModel.getTvShow(dummyTvShow.getId()).observeForever(observer);
+        detailTvShowViewModel.getTvShow().observeForever(observer);
 
         verify(observer).onChanged(dummyTvShow);
     }

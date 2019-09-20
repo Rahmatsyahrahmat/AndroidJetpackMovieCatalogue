@@ -8,6 +8,7 @@ import androidx.lifecycle.Observer;
 import com.rahmatsyah.moviecatalogue.data.source.CatalogueRepository;
 import com.rahmatsyah.moviecatalogue.data.source.local.entity.TvShowEntity;
 import com.rahmatsyah.moviecatalogue.utils.FakeDataDummy;
+import com.rahmatsyah.moviecatalogue.vo.Resource;
 
 import org.junit.After;
 import org.junit.Before;
@@ -15,6 +16,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -38,14 +40,14 @@ public class TvShowViewModelTest {
 
     @Test
     public void getTvShows() {
-        ArrayList<TvShowEntity> dummyTvShow = FakeDataDummy.generateDummyTvShow();
+        Resource<List<TvShowEntity>> dummyTvShow = Resource.success(FakeDataDummy.generateDummyTvShow());
 
-        MutableLiveData<ArrayList<TvShowEntity>> mutableLiveData = new MutableLiveData<>();
+        MutableLiveData<Resource<List<TvShowEntity>>> mutableLiveData = new MutableLiveData<>();
         mutableLiveData.setValue(dummyTvShow);
 
         when(catalogueRepository.getTvShows()).thenReturn(mutableLiveData);
 
-        Observer<ArrayList<TvShowEntity>> observer = mock(Observer.class);
+        Observer<Resource<List<TvShowEntity>>> observer = mock(Observer.class);
 
         tvShowViewModel.getTvShows().observeForever(observer);
 

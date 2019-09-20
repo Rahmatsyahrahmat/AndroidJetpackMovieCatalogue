@@ -3,6 +3,7 @@ package com.rahmatsyah.moviecatalogue.data.source.local;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
+import androidx.paging.DataSource;
 
 import com.rahmatsyah.moviecatalogue.data.source.local.entity.MovieEntity;
 import com.rahmatsyah.moviecatalogue.data.source.local.entity.TvShowEntity;
@@ -43,11 +44,11 @@ public class LocalRepository {
        return catalogueDao.getTvShowById(id);
    }
 
-   public LiveData<List<MovieEntity>> getBookmarkedMovies(){
+   public DataSource.Factory<Integer, MovieEntity> getBookmarkedMovies(){
        return catalogueDao.getBookmarkedMovies();
    }
 
-   public LiveData<List<TvShowEntity>> getBookmarkedTvShows(){
+   public DataSource.Factory<Integer, TvShowEntity> getBookmarkedTvShows(){
        return catalogueDao.getBookmarkedTvShows();
    }
 

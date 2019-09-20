@@ -1,14 +1,21 @@
 package com.rahmatsyah.moviecatalogue.data.source;
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
+import androidx.lifecycle.MutableLiveData;
+import androidx.paging.DataSource;
+import androidx.paging.PagedList;
 
+import com.rahmatsyah.moviecatalogue.data.source.local.LocalRepository;
 import com.rahmatsyah.moviecatalogue.data.source.local.entity.MovieEntity;
 import com.rahmatsyah.moviecatalogue.data.source.local.entity.TvShowEntity;
 import com.rahmatsyah.moviecatalogue.data.source.remote.RemoteRepository;
 import com.rahmatsyah.moviecatalogue.data.source.remote.response.MovieResponse;
 import com.rahmatsyah.moviecatalogue.data.source.remote.response.TvShowResponse;
 import com.rahmatsyah.moviecatalogue.utils.FakeDataDummy;
+import com.rahmatsyah.moviecatalogue.utils.InstantAppExecutor;
 import com.rahmatsyah.moviecatalogue.utils.LiveDataTestUtil;
+import com.rahmatsyah.moviecatalogue.utils.PagedListUtil;
+import com.rahmatsyah.moviecatalogue.vo.Resource;
 
 import org.junit.After;
 import org.junit.Before;
@@ -17,21 +24,22 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-public class CatalogueRepositoryTest {
+public class CatalogueRepositoryTest  {
 
     @Rule
     public InstantTaskExecutorRule instantTaskExecutorRule = new InstantTaskExecutorRule();
 
-    private RemoteRepository remoteRepository = Mockito.mock(RemoteRepository.class);
-    private FakeCatalogueRepository catalogueRepository = new FakeCatalogueRepository(remoteRepository);
+    private LocalRepository localRepository = mock(LocalRepository.class);
+    private RemoteRepository remoteRepository = mock(RemoteRepository.class);
+    private InstantAppExecutor instantAppExecutor = mock(InstantAppExecutor.class);
+    private FakeCatalogueRepository catalogueRepository = new FakeCatalogueRepository(localRepository,remoteRepository,instantAppExecutor);
 
     private ArrayList<MovieResponse> movieResponses = FakeDataDummy.generateRemoteDummyMovie();
     private MovieResponse movieResponse = movieResponses.get(0);
@@ -49,67 +57,91 @@ public class CatalogueRepositoryTest {
     }
 
     @Test
-    public void getMovies(){
-        doAnswer(invocation -> {
-            ((RemoteRepository.LoadMoviesCallback) invocation.getArguments()[0])
-                .onAllMovieReceived(movieResponses);
-            return null;
-        }).when(remoteRepository).getMovies(any(RemoteRepository.LoadMoviesCallback.class));
+    public void getMovies() {
+        MutableLiveData<List<MovieEntity>> dummyMovie = new MutableLiveData<>();
+        dummyMovie.setValue(FakeDataDummy.generateDummyMovie());
 
-        ArrayList<MovieEntity> result = LiveDataTestUtil.getValue(catalogueRepository.getMovies());
+        when(localRepository.getMovies()).thenReturn(dummyMovie);
 
-        verify(remoteRepository,times(1)).getMovies(any(RemoteRepository.LoadMoviesCallback.class));
+        Resource<List<MovieEntity>> result = LiveDataTestUtil.getValue(catalogueRepository.getMovies());
 
-        assertNotNull(result);
-        assertEquals(movieResponses.size(),result.size());
+        verify(localRepository).getMovies();
+        assertNotNull(result.data);
+        assertEquals(movieResponses.size(),result.data.size());
     }
 
     @Test
-    public void getTvShows(){
-        doAnswer(invocation -> {
-            ((RemoteRepository.LoadTvShowsCallback) invocation.getArguments()[0])
-                    .onAllTvShowReceived(tvShowResponses);
-            return null;
-        }).when(remoteRepository).getTvShows(any(RemoteRepository.LoadTvShowsCallback.class));
+    public void getTvShows() {
+        MutableLiveData<List<TvShowEntity>> dummyTvShow = new MutableLiveData<>();
+        dummyTvShow.setValue(FakeDataDummy.generateDummyTvShow());
 
-        ArrayList<TvShowEntity> result = LiveDataTestUtil.getValue(catalogueRepository.getTvShows());
+        when(localRepository.getTvShows()).thenReturn(dummyTvShow);
 
-        verify(remoteRepository,times(1)).getTvShows(any(RemoteRepository.LoadTvShowsCallback.class));
+        Resource<List<TvShowEntity>> result = LiveDataTestUtil.getValue(catalogueRepository.getTvShows());
 
-        assertNotNull(result);
-        assertEquals(tvShowResponses.size(),result.size());
+        verify(localRepository).getTvShows();
+        assertNotNull(result.data);
+        assertEquals(tvShowResponses.size(),result.data.size());
     }
 
     @Test
-    public void getMovie(){
-        doAnswer(invocation -> {
-            ((RemoteRepository.LoadMovieCallback) invocation.getArguments()[1])
-                    .onMovieReceived(movieResponse);
-            return null;
-        }).when(remoteRepository).getMovie(eq(movieResponse.getId()),any(RemoteRepository.LoadMovieCallback.class));
+    public void getMovie() {
+        MutableLiveData<MovieEntity> dummyMovie = new MutableLiveData<>();
+        dummyMovie.setValue(FakeDataDummy.generateDummyMovie().get(0));
 
-        MovieEntity result = LiveDataTestUtil.getValue(catalogueRepository.getMovie(movieResponse.getId()));
+        when(localRepository.getMovieById(movieResponse.getId())).thenReturn(dummyMovie);
 
-        verify(remoteRepository,times(1)).getMovie(eq(movieResponse.getId()),any(RemoteRepository.LoadMovieCallback.class));
+        Resource<MovieEntity> result = LiveDataTestUtil.getValue(catalogueRepository.getMovie(movieResponse.getId()));
+
+        verify(localRepository).getMovieById(movieResponse.getId());
 
         assertNotNull(result);
-        assertEquals(movieResponse.getId(),result.getId());
+
+        assertNotNull(result.data);
+        assertEquals(result.data.getId(),movieResponse.getId());
     }
 
     @Test
-    public void getTvShow(){
-        doAnswer(invocation -> {
-            ((RemoteRepository.LoadTvShowCallback) invocation.getArguments()[1])
-                    .onTvShowReceived(tvShowResponse);
-            return null;
-        }).when(remoteRepository).getTvShow(eq(tvShowResponse.getId()),any(RemoteRepository.LoadTvShowCallback.class));
+    public void getTvShow() {
+        MutableLiveData<TvShowEntity> dummyTvShow = new MutableLiveData<>();
+        dummyTvShow.setValue(FakeDataDummy.generateDummyTvShow().get(0));
 
-        TvShowEntity result = LiveDataTestUtil.getValue(catalogueRepository.getTvShow(tvShowResponse.getId()));
+        when(localRepository.getTvShowById(tvShowResponse.getId())).thenReturn(dummyTvShow);
 
-        verify(remoteRepository,times(1)).getTvShow(eq(tvShowResponse.getId()),any(RemoteRepository.LoadTvShowCallback.class));
+        Resource<TvShowEntity> result = LiveDataTestUtil.getValue(catalogueRepository.getTvShow(tvShowResponse.getId()));
+
+        verify(localRepository).getTvShowById(tvShowResponse.getId());
 
         assertNotNull(result);
-        assertEquals(tvShowResponse.getId(),result.getId());
+        assertNotNull(result.data);
+        assertEquals(result.data.getId(),tvShowResponse.getId());
     }
+
+    @Test
+    public void getBookmarkedMovies() {
+        DataSource.Factory<Integer,MovieEntity> dataSourceFactory = mock(DataSource.Factory.class);
+
+        when(localRepository.getBookmarkedMovies()).thenReturn(dataSourceFactory);
+        catalogueRepository.getBookmarkedMovies();
+        Resource<PagedList<MovieEntity>> result = Resource.success(PagedListUtil.mockPagedList(FakeDataDummy.generateDummyMovie()));
+
+        verify(localRepository).getBookmarkedMovies();
+        assertNotNull(result.data);
+        assertEquals(FakeDataDummy.generateDummyMovie().size(),result.data.size());
+    }
+
+    @Test
+    public void getBookmarkedTvShows() {
+        DataSource.Factory<Integer, TvShowEntity> dataSourceFactory = mock(DataSource.Factory.class);
+
+        when(localRepository.getBookmarkedTvShows()).thenReturn(dataSourceFactory);
+        catalogueRepository.getBookmarkedTvShows();
+        Resource<PagedList<TvShowEntity>> result = Resource.success(PagedListUtil.mockPagedList(FakeDataDummy.generateDummyTvShow()));
+
+        verify(localRepository).getBookmarkedTvShows();
+        assertNotNull(result.data);
+        assertEquals(FakeDataDummy.generateDummyTvShow().size(),result.data.size());
+    }
+
 
 }

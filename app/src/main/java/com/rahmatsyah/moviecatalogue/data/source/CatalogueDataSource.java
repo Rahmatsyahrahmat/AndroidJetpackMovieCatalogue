@@ -1,6 +1,7 @@
 package com.rahmatsyah.moviecatalogue.data.source;
 
 import androidx.lifecycle.LiveData;
+import androidx.paging.PagedList;
 
 import com.rahmatsyah.moviecatalogue.data.source.local.entity.MovieEntity;
 import com.rahmatsyah.moviecatalogue.data.source.local.entity.TvShowEntity;
@@ -19,9 +20,9 @@ public interface CatalogueDataSource {
 
     LiveData<Resource<TvShowEntity>> getTvShow(long id);
 
-    LiveData<Resource<List<MovieEntity>>> getBookmarkedMovies();
+    LiveData<Resource<PagedList<MovieEntity>>> getBookmarkedMovies();
 
-    LiveData<Resource<List<TvShowEntity>>> getBookmarkedTvShows();
+    LiveData<Resource<PagedList<TvShowEntity>>> getBookmarkedTvShows();
 
     void bookmark(MovieEntity movieEntity);
 
